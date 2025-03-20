@@ -1,0 +1,22 @@
+{"level":"info","message":"DB_USERNAME:","timestamp":"2025-03-20T17:18:26.558Z"}
+{"level":"info","message":"MARIADB_DATABASE:","timestamp":"2025-03-20T17:18:26.561Z"}
+{"level":"info","message":"Environment variables loaded","timestamp":"2025-03-20T17:18:26.709Z"}
+{"level":"info","message":"Logger initialized","timestamp":"2025-03-20T17:18:26.710Z"}
+{"level":"info","message":"Express App initialized","timestamp":"2025-03-20T17:18:26.710Z"}
+{"level":"info","message":"Middleware initialized","timestamp":"2025-03-20T17:18:26.710Z"}
+{"level":"info","message":"MariaDB Connection initialized","timestamp":"2025-03-20T17:18:26.710Z"}
+{"level":"info","message":"Job Model defined","timestamp":"2025-03-20T17:18:26.710Z"}
+{"level":"info","message":"Database syncing...","timestamp":"2025-03-20T17:18:26.710Z"}
+{"level":"info","message":"Routes initialized","timestamp":"2025-03-20T17:18:26.710Z"}
+{"level":"info","message":"Server starting...","timestamp":"2025-03-20T17:18:26.711Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2025-03-20T17:18:26.714Z"}
+{"level":"info","message":"MariaDB Connected","timestamp":"2025-03-20T17:18:26.763Z"}
+{"level":"info","message":"Database & tables ready","timestamp":"2025-03-20T17:18:27.031Z"}
+{"level":"info","message":"GET /jobs","timestamp":"2025-03-20T17:44:22.001Z"}
+{"level":"info","message":"GET /jobs","timestamp":"2025-03-20T18:02:53.564Z"}
+{"level":"info","message":"GET /jobs","timestamp":"2025-03-20T18:04:55.662Z"}
+{"level":"info","message":"GET /jobs","timestamp":"2025-03-20T18:05:24.064Z"}
+{"level":"info","message":"GET /jobs","timestamp":"2025-03-20T18:08:01.352Z"}
+{"level":"info","message":"GET /jobs","timestamp":"2025-03-20T18:12:53.632Z"}
+{"level":"info","message":"GET /jobs","timestamp":"2025-03-20T18:13:09.897Z"}
+{"level":"info","message":"GET /jobs","timestamp":"2025-03-20T18:14:55.598Z"}
