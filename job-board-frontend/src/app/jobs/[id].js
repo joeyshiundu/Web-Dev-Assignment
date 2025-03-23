@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
-export default function JobDetails() {
+ function JobDetails() {
   const { id } = useParams();
   const [job, setJob] = useState(null);
 
@@ -23,3 +23,6 @@ export default function JobDetails() {
     </div>
   );
 }
+
+
+export default  JobDetails;

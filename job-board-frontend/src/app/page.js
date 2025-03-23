@@ -1,37 +1,76 @@
-"use client"
+"use client";
+
 import Link from "next/link";
 import Navbar from "./components/Navbar";
-
+import JobCard from "./components/JobCard";
 import { useEffect, useState } from "react";
 
 export default function Home() {
   const [jobs, setJobs] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [displayJobs, setDisplayJobs] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/jobs") // Fetch jobs from backend
+    fetch("http://localhost:5000/jobs")
       .then((res) => res.json())
-      .then((data) => setJobs(data))
+      .then((data) => {
+        setJobs(data);
+        shuffleAndSetJobs(data);
+      })
       .catch((err) => console.error(err));
   }, []);
 
-  return (
-    <div className="p-6">
-      <Navbar />
-      <h1 className="text-2xl font-bold mb-4">Welcome to Job Board</h1>
-      <p className="text-gray-600 mt-2">Find your dream job or hire top talent.</p>
-      
-        {jobs.map((job) => (
-        <div key={job._id} className="border p-4 mb-2">
-          <h2 className="text-xl">{job.title}</h2>
-          <p>{job.company} - {job.location}</p>
-          <p>{job.salary}</p>
-          <a href={`/job/${job._id}`} className="text-blue-500">View Details</a>
-        </div>
-      ))}
+  useEffect(() => {
+    const interval = setInterval(() => {
+      shuffleAndSetJobs(jobs);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [jobs]);
 
-    <div className="mt-4">
-        <Link href="/jobs" className="bg-blue-500 text-white p-2 rounded">Browse Jobs</Link>
-        <Link href="/dashboard" className="ml-4 bg-green-500 text-white p-2 rounded">Employer Dashboard</Link>
+  const shuffleAndSetJobs = (jobsList) => {
+    if (jobsList.length > 0) {
+      const shuffled = [...jobsList].sort(() => 0.5 - Math.random()).slice(0, 3);
+      setDisplayJobs(shuffled);
+    }
+  };
+
+  const filteredJobs = displayJobs.filter((job) =>
+    job.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <Navbar />
+
+      {/* Hero Section */}
+      <div className="bg-blue-600 text-white py-16 text-center mx-6 rounded-b-2xl">
+        <h1 className="text-4xl font-bold">Find Your Dream Job</h1>
+        <p className="text-lg mt-2">Discover top job opportunities or hire top talent.</p>
+        <div className="mt-6">
+          <Link href="/jobs" className="bg-white text-blue-600 px-6 py-2 rounded-full font-semibold shadow-md">Browse Jobs</Link>
+          <Link href="/dashboard" className="ml-4 bg-green-500 text-white px-6 py-2 rounded-full font-semibold shadow-md">Post a Job</Link>
+        </div>
+      </div>
+
+      {/* Search Bar */}
+      <div className="container mx-auto p-6">
+        <input
+          type="text"
+          placeholder="Search jobs..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full p-2 mb-4 border border-gray-300 rounded-lg"
+        />
+
+        {filteredJobs.length === 0 ? (
+          <p className="text-gray-600">No jobs found.</p>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredJobs.map((job) => (
+              <JobCard key={job._id} job={job} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

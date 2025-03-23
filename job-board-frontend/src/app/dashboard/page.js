@@ -35,41 +35,86 @@ export default function Dashboard() {
   };
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-100">
       <Navbar />
-      <div className="p-10">
       
+      {/* Main Container */}
+      <div className="max-w-5xl mx-auto p-6">
+        
+        {/* Page Title */}
+        <h1 className="text-3xl font-bold text-gray-800 mb-6">Employer Dashboard</h1>
+        
+        {/* Job Posting Form (Card) */}
+        <div className="bg-white shadow-md rounded-lg p-6 mb-8">
+          <h2 className="text-xl font-semibold text-gray-700 mb-4">Post a Job</h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input 
+              name="title" 
+              placeholder="Job Title" 
+              className="border border-gray-300 rounded-md p-3 w-full focus:ring focus:ring-blue-200"
+              value={form.title} 
+              onChange={handleChange} 
+              required 
+            />
+            <input 
+              name="company" 
+              placeholder="Company Name" 
+              className="border border-gray-300 rounded-md p-3 w-full focus:ring focus:ring-blue-200"
+              value={form.company} 
+              onChange={handleChange} 
+              required 
+            />
+            <input 
+              name="location" 
+              placeholder="Location" 
+              className="border border-gray-300 rounded-md p-3 w-full focus:ring focus:ring-blue-200"
+              value={form.location} 
+              onChange={handleChange} 
+              required 
+            />
+            <input 
+              name="salary" 
+              placeholder="Salary" 
+              className="border border-gray-300 rounded-md p-3 w-full focus:ring focus:ring-blue-200"
+              value={form.salary} 
+              onChange={handleChange} 
+              required 
+            />
+            <textarea 
+              name="description" 
+              placeholder="Job Description" 
+              className="border border-gray-300 rounded-md p-3 w-full h-32 focus:ring focus:ring-blue-200"
+              value={form.description} 
+              onChange={handleChange} 
+              required 
+            />
+            <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md w-full transition">
+              Post Job
+            </button>
+          </form>
+        </div>
 
-      {/* Job Listings */}
-      <h2 className="text-xl font-semibold mb-2">Your Posted Jobs</h2>
-      {jobs.length === 0 ? (
-        <p>No jobs posted yet.</p>
-      ) : (
-        jobs.map((job) => (
-          <div key={job._id} className="border p-4 mb-2">
-            <h3 className="font-semibold">{job.title}</h3>
-            <p>{job.company} - {job.location}</p>
-            <p>Salary: {job.salary}</p>
-            <p>{job.description}</p>
-          </div>
-        ))
-      )}
-
-
-<h1 className="text-2xl font-bold mb-4">Employer Dashboard</h1>
-
-{/* Job Posting Form */}
-<form className="border p-4 mb-6" onSubmit={handleSubmit}>
-  <h2 className="text-xl font-semibold mb-2">Post a Job</h2>
-  <input name="title" placeholder="Job Title" className="border p-2 w-full mb-2" value={form.title} onChange={handleChange} required />
-  <input name="company" placeholder="Company Name" className="border p-2 w-full mb-2" value={form.company} onChange={handleChange} required />
-  <input name="location" placeholder="Location" className="border p-2 w-full mb-2" value={form.location} onChange={handleChange} required />
-  <input name="salary" placeholder="Salary" className="border p-2 w-full mb-2" value={form.salary} onChange={handleChange} required />
-  <textarea name="description" placeholder="Job Description" className="border p-2 w-full mb-2" value={form.description} onChange={handleChange} required />
-  <button type="submit" className="bg-blue-500 text-white p-2 w-full">Post Job</button>
-</form>
+        {/* Job Listings Section */}
+        <div className="bg-white shadow-md rounded-lg p-6">
+          <h2 className="text-xl font-semibold text-gray-700 mb-4">Your Posted Jobs</h2>
+          
+          {jobs.length === 0 ? (
+            <p className="text-gray-500">No jobs posted yet.</p>
+          ) : (
+            <div className="space-y-4">
+              {jobs.map((job) => (
+                <div key={job._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+                  <h3 className="text-lg font-semibold text-gray-800">{job.title}</h3>
+                  <p className="text-gray-600">{job.company} - {job.location}</p>
+                  <p className="text-gray-700 font-medium">💰 Salary: {job.salary}</p>
+                  <p className="text-gray-500 mt-2">{job.description}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        
+      </div>
     </div>
-    </div>
-    
   );
 }

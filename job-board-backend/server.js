@@ -3,17 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const { Sequelize, DataTypes } = require("sequelize");
 const winston = require("winston");
-
-
-
-// Debug logs to check environment variables
-/*
-console.log("MARIADB_HOST:", process.env.MARIADB_HOST);
-console.log("MARIADB_DATABASE:", process.env.MARIADB_DATABASE);
-console.log("MARIADB_USER:", process.env.MARIADB_USER);
-console.log("MARIADB_PASSWORD:", process.env.MARIADB_PASSWORD);
-console.log("PORT:", process.env.PORT);
-*/
+const jwt = require("jsonwebtoken");
 
 // Create a logger
 const logger = winston.createLogger({
@@ -27,10 +17,6 @@ const logger = winston.createLogger({
     new winston.transports.File({ filename: "combined.log" }),
   ],
 });
-
-// Log environment variables for debugging
-logger.info("DB_USERNAME:", process.env.DB_USERNAME);
-logger.info("MARIADB_DATABASE:", process.env.MARIADB_DATABASE);
 
 // Initialize Express App
 const app = express();
@@ -62,11 +48,20 @@ const sequelize = new Sequelize(
   }
 })();
 
-// Job Model
-const Job = sequelize.define(
-  "Job", // Model name
+// ✅ User Model
+const User = sequelize.define(
+  "User",
   {
-    // Attributes
+    email: { type: DataTypes.STRING, allowNull: false, unique: true },
+    password: { type: DataTypes.STRING, allowNull: false },
+  },
+  { tableName: "users" }
+);
+
+// ✅ Job Model
+const Job = sequelize.define(
+  "Job",
+  {
     title: { type: DataTypes.STRING, allowNull: false },
     company: { type: DataTypes.STRING, allowNull: false },
     location: { type: DataTypes.STRING, allowNull: false },
@@ -74,32 +69,20 @@ const Job = sequelize.define(
     description: { type: DataTypes.TEXT },
     postedAt: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
   },
-  {
-    tableName: "jobs", // Explicitly set the table name to 'jobs'
-  }
+  { tableName: "jobs" }
 );
 
 // Sync Database
 sequelize
-  .sync({ alter: true }) // Creates/Updates tables
+  .sync({ alter: true }) // Use `alter: true` cautiously in production
   .then(() => logger.info("Database & tables ready"))
   .catch((err) => logger.error("Error syncing database:", err));
 
 // Routes
 app.get("/", (req, res) => {
-  logger.info("GET /");
   res.send("Job Board API is running!");
-});logger.info("Environment variables loaded");
-logger.info("Logger initialized");
-logger.info("Express App initialized");
-logger.info("Middleware initialized");
-logger.info("MariaDB Connection initialized");
-logger.info("Job Model defined");
-logger.info("Database syncing...");
-logger.info("Routes initialized");
-logger.info("Server starting...");
+});
 
-// Get all jobs
 app.get("/jobs", async (req, res) => {
   try {
     logger.info("GET /jobs");
@@ -111,22 +94,78 @@ app.get("/jobs", async (req, res) => {
   }
 });
 
-// Post a new job
-app.post("/jobs", async (req, res) => {
+// ✅ Get a Single Job by ID
+app.get("/jobs/:id", async (req, res) => {
   try {
-    logger.info("POST /jobs", { body: req.body });
-    const { title, company, location, salary, description } = req.body;
+    logger.info(`GET /jobs/${req.params.id}`);
+    const job = await Job.findByPk(req.params.id);
 
-    // Validate required fields
-    if (!title || !company || !location) {
-      return res.status(400).json({ error: "Title, company, and location are required" });
+    if (!job) {
+      return res.status(404).json({ error: "Job not found" });
     }
 
-    const newJob = await Job.create({ title, company, location, salary, description });
-    res.status(201).json(newJob);
+    res.json(job);
   } catch (error) {
-    logger.error("Error posting job:", error);
+    logger.error(`Error getting job with ID ${req.params.id}:`, error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+
+// ✅ Register Route 
+app.post("/api/auth/register", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({ error: "User already exists" });
+    }
+
+    // Create new user without hashing password
+    const newUser = await User.create({ email, password });
+
+    res.status(201).json({ message: "User registered successfully", userId: newUser.id });
+  } catch (error) {
+    logger.error("Error registering user:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ✅ Login Route with JWT
+app.post("/api/auth/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+
+    // Find user in the database
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    // Directly compare plain text passwords
+    if (password !== user.password) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    // Generate JWT Token
+    const token = jwt.sign(
+      { userId: user.id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.status(200).json({ token });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
