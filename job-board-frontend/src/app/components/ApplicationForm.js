@@ -1,14 +1,17 @@
 "use client"
 import { useState, useEffect } from "react";
+import axios from "axios"; // Make sure to install axios: npm install axios
 
 const ApplicationForm = ({ jobId, userEmail, onClose }) => {
   const [formData, setFormData] = useState({
     job_id: "",
-    email: "", // Changed from user_id to email
+    email: "",
     cover_letter: "",
     status: "pending",
     applied_at: new Date().toISOString().slice(0, 19).replace("T", " "),
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     // Auto-fill job_id and email when component mounts
@@ -23,17 +26,35 @@ const ApplicationForm = ({ jobId, userEmail, onClose }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Application Submitted:", formData);
-    // You can integrate an API call here to save the data
-    // After successful submission:
-    onClose();
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const response = await axios.post('api/applications', formData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log("Application Submitted:", response.data);
+      onClose(); // Close the form on successful submission
+    } catch (err) {
+      console.error("Application submission error:", err);
+      setError(err.response?.data?.error || "Failed to submit application");
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="max-w-lg mx-auto p-6 bg-white rounded-md">
       <h2 className="text-xl font-semibold mb-4">Job Application Form</h2>
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+          {error}
+        </div>
+      )}
       <form onSubmit={handleSubmit}>
         <label className="block mb-2">
           Job ID:
@@ -57,7 +78,7 @@ const ApplicationForm = ({ jobId, userEmail, onClose }) => {
             onChange={handleChange}
             className="w-full p-2 border rounded"
             required
-            readOnly={!!userEmail} // Only readonly if userEmail is provided
+            readOnly={!!userEmail}
           />
         </label>
 
@@ -78,14 +99,16 @@ const ApplicationForm = ({ jobId, userEmail, onClose }) => {
             type="button"
             onClick={onClose}
             className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+            disabled={isSubmitting}
           >
             Cancel
           </button>
           <button
             type="submit"
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            disabled={isSubmitting}
           >
-            Submit Application
+            {isSubmitting ? "Submitting..." : "Submit Application"}
           </button>
         </div>
       </form>

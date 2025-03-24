@@ -77,6 +77,47 @@ const Job = sequelize.define(
   { tableName: "jobs" }
 );
 
+// ✅ Application Model
+const Application = sequelize.define(
+  "Application",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    job_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'jobs',
+        key: 'id'
+      }
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    cover_letter: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.ENUM('pending', 'reviewed', 'accepted', 'rejected'),
+      defaultValue: 'pending'
+    },
+    applied_at: {
+      type: DataTypes.DATE,
+      defaultValue: Sequelize.NOW
+    }
+  },
+  { tableName: 'applications' }
+);
+
+// Define associations
+Job.hasMany(Application, { foreignKey: 'job_id' });
+Application.belongsTo(Job, { foreignKey: 'job_id' });
+
 // Sync Database
 sequelize
   .sync({ alter: true }) // Use `alter: true` cautiously in production
@@ -85,6 +126,12 @@ sequelize
 
 // Routes
 
+// Root Route
+app.get("/", (req, res) => {
+  res.send("Job Board API is running!");
+});
+
+// Job Routes
 app.post("/jobs", async (req, res) => {
   try {
     logger.info("POST /jobs");
@@ -102,11 +149,6 @@ app.post("/jobs", async (req, res) => {
   }
 });
 
-
-app.get("/", (req, res) => {
-  res.send("Job Board API is running!");
-});
-
 app.get("/jobs", async (req, res) => {
   try {
     logger.info("GET /jobs");
@@ -118,7 +160,7 @@ app.get("/jobs", async (req, res) => {
   }
 });
 
-// ✅ Get a Single Job by ID
+// Get a Single Job by ID
 app.get("/jobs/:id", async (req, res) => {
   try {
     logger.info(`GET /jobs/${req.params.id}`);
@@ -135,8 +177,56 @@ app.get("/jobs/:id", async (req, res) => {
   }
 });
 
+// Application Routes
+app.post("/api/applications", async (req, res) => {
+  try {
+    logger.info("POST /api/applications");
+    const { job_id, email, cover_letter, status, applied_at } = req.body;
 
-// ✅ Register Route 
+    // Validate required fields
+    if (!job_id || !email || !cover_letter) {
+      return res.status(400).json({ error: "Job ID, email, and cover letter are required" });
+    }
+
+    // Check if the job exists
+    const job = await Job.findByPk(job_id);
+    if (!job) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+
+    // Create new application
+    const newApplication = await Application.create({
+      job_id,
+      email,
+      cover_letter,
+      status: status || 'pending',
+      applied_at: applied_at || new Date()
+    });
+
+    res.status(201).json(newApplication);
+  } catch (error) {
+    logger.error("Error creating application:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get applications for a specific job
+app.get("/applications", async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const applications = await Application.findAll({
+      where: { job_id: jobId },
+      include: [Job] // Optional: include job details
+    });
+    res.json(applications);
+  } catch (error) {
+    logger.error(`Error getting applications for job ${req.params.jobId}:`, error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Authentication Routes
+// Register Route 
 app.post("/api/auth/register", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -160,7 +250,7 @@ app.post("/api/auth/register", async (req, res) => {
   }
 });
 
-// ✅ Login Route with JWT
+// Login Route with JWT
 app.post("/api/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
