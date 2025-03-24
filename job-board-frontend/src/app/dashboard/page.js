@@ -1,25 +1,36 @@
 "use client";
 
-import Navbar from "../components/Navbar"; // Import Navbar component
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 export default function Dashboard() {
+  const router = useRouter();
   const [jobs, setJobs] = useState([]);
   const [form, setForm] = useState({ title: "", company: "", location: "", salary: "", description: "" });
+  const [loading, setLoading] = useState(true);
 
-  // Fetch jobs posted by the employer
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      router.push("/login"); // Redirect to login if not authenticated
+    } else {
+      setLoading(false);
+    }
+  }, [router]);
+
   useEffect(() => {
     fetch("http://localhost:5000/jobs")
       .then((res) => res.json())
       .then((data) => setJobs(data));
   }, []);
 
-  // Handle form input changes
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // Submit new job posting
   const handleSubmit = async (e) => {
     e.preventDefault();
     const response = await fetch("http://localhost:5000/jobs", {
@@ -34,17 +45,13 @@ export default function Dashboard() {
     }
   };
 
+  if (loading) return <p>Loading...</p>;
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar />
-      
-      {/* Main Container */}
       <div className="max-w-5xl mx-auto p-6">
-        
-        {/* Page Title */}
         <h1 className="text-3xl font-bold text-gray-800 mb-6">Employer Dashboard</h1>
-        
-        {/* Job Posting Form (Card) */}
         <div className="bg-white shadow-md rounded-lg p-6 mb-8">
           <h2 className="text-xl font-semibold text-gray-700 mb-4">Post a Job</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -93,11 +100,8 @@ export default function Dashboard() {
             </button>
           </form>
         </div>
-
-        {/* Job Listings Section */}
         <div className="bg-white shadow-md rounded-lg p-6">
           <h2 className="text-xl font-semibold text-gray-700 mb-4">Your Posted Jobs</h2>
-          
           {jobs.length === 0 ? (
             <p className="text-gray-500">No jobs posted yet.</p>
           ) : (
@@ -113,8 +117,8 @@ export default function Dashboard() {
             </div>
           )}
         </div>
-        
       </div>
+      <Footer />
     </div>
   );
 }

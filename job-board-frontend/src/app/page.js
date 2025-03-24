@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Navbar from "./components/Navbar";
 import JobCard from "./components/JobCard";
+import Footer from "./components/Footer";
 import { useEffect, useState } from "react";
 
 export default function Home() {
@@ -67,11 +68,12 @@ export default function Home() {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredJobs.map((job) => (
-              <JobCard key={job._id} job={job} />
+              <JobCard key={job.id} job={job} />
             ))}
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 }

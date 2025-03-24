@@ -62,6 +62,11 @@ const User = sequelize.define(
 const Job = sequelize.define(
   "Job",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true, // ✅ Automatically generates an ID
+      primaryKey: true,
+    },
     title: { type: DataTypes.STRING, allowNull: false },
     company: { type: DataTypes.STRING, allowNull: false },
     location: { type: DataTypes.STRING, allowNull: false },
@@ -79,6 +84,25 @@ sequelize
   .catch((err) => logger.error("Error syncing database:", err));
 
 // Routes
+
+app.post("/jobs", async (req, res) => {
+  try {
+    logger.info("POST /jobs");
+    const { title, company, location, salary, description } = req.body;
+
+    if (!title || !company || !location || !description) {
+      return res.status(400).json({ error: "All fields except salary are required" });
+    }
+
+    const newJob = await Job.create({ title, company, location, salary, description });
+    res.status(201).json(newJob);
+  } catch (error) {
+    logger.error("Error creating job:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 app.get("/", (req, res) => {
   res.send("Job Board API is running!");
 });

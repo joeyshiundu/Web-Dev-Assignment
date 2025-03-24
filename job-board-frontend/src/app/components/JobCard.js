@@ -12,6 +12,7 @@ function JobCard({ job }) {
 
   // State to store the randomly selected background
   const [randomBackground, setRandomBackground] = useState("");
+  const [isHovered, setIsHovered] = useState(false);
 
   // Randomly select a background when the component mounts
   useEffect(() => {
@@ -20,7 +21,11 @@ function JobCard({ job }) {
   }, []);
 
   return (
-    <div className="flex bg-white border border-gray-200 rounded-2xl shadow-lg transition-transform transform hover:scale-105 hover:shadow-xl">
+    <div 
+      className="flex bg-white border border-gray-200 rounded-2xl shadow-lg transition-transform transform hover:scale-105 hover:shadow-xl relative"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {/* SVG Background Div */}
       <div
         className="w-1/3 bg-cover bg-center rounded-l-2xl bg-gray-100"
@@ -32,12 +37,29 @@ function JobCard({ job }) {
       <div className="w-2/3 p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-2">{job.title}</h2>
         <p className="text-gray-500 text-lg mb-1">{job.company} - {job.location}</p>
-        <p className="text-green-600 text-lg font-semibold mb-4">{job.salary}</p>
-        <Link href={`/jobs/${job.id}`}>
-          <button className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition duration-300">
-            View Details
-          </button>
-        </Link>
+        <p className="text-green-600 text-lg font-semibold mb-4">${job.salary.toLocaleString()}</p>
+        
+        {/* Description overlay that appears on hover */}
+        {isHovered && (
+          <div className="absolute inset-0 bg-white bg-opacity-90 rounded-2xl p-6 flex flex-col">
+            <h3 className="text-xl font-bold mb-2">Job Description</h3>
+            <p className="text-gray-700 mb-4 flex-grow">{job.description}</p>
+            <Link href={`/jobs/${job.id}`} className="self-end">
+              <button className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition duration-300">
+                Apply Now
+              </button>
+            </Link>
+          </div>
+        )}
+        
+        {/* Default button (hidden when hovered) */}
+        {!isHovered && (
+          <Link href={`/jobs/${job.id}`}>
+            <button className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition duration-300">
+              View Details
+            </button>
+          </Link>
+        )}
       </div>
     </div>
   );
