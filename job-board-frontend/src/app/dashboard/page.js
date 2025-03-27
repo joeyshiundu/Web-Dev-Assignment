@@ -15,7 +15,7 @@ export default function Dashboard() {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      router.push("/login"); // Redirect to login if not authenticated
+      router.push("/auth/login"); // Redirect to login if not authenticated
     } else {
       setLoading(false);
     }
@@ -23,8 +23,18 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetch("http://localhost:5000/jobs")
-      .then((res) => res.json())
-      .then((data) => setJobs(data));
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch jobs");
+        }
+        return res.json();
+      })
+      .then((data) => setJobs(data))
+      .catch((error) => {
+        console.error(error);
+        // Optionally redirect to login or show an error message
+        router.push("/auth/login");
+      });
   }, []);
 
   const handleChange = (e) => {

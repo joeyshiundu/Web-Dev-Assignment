@@ -32,11 +32,11 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4 text-gray-200">Contact Us</h3>
             <p className="flex items-center justify-center md:justify-start space-x-2 text-gray-400 hover:text-blue-300 transition">
               <FaEnvelope size={18} />
-              <a href="mailto:info@yourcompany.com">info@yourcompany.com</a>
+              <a href="mailto:info@yourcompany.com">info@jobboard.com</a>
             </p>
             <p className="flex items-center justify-center md:justify-start space-x-2 text-gray-400 hover:text-green-400 transition mt-2">
               <FaPhone size={18} />
-              <a href="tel:+123456789">+123 456 789</a>
+              <a href="tel:+123456789">+254 735033337</a>
             </p>
           </div>
 

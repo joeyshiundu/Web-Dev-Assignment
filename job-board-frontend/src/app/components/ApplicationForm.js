@@ -32,7 +32,7 @@ const ApplicationForm = ({ jobId, userEmail, onClose }) => {
     setError(null);
 
     try {
-      const response = await axios.post('api/applications', formData, {
+      const response = await axios.post('http://localhost:5000/api/applications', formData, {
         headers: {
           'Content-Type': 'application/json'
         }

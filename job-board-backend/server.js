@@ -24,7 +24,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors( { origin: "*"} ));
 
 // MariaDB Connection using Sequelize
 const sequelize = new Sequelize(
@@ -211,19 +211,25 @@ app.post("/api/applications", async (req, res) => {
 });
 
 // Get applications for a specific job
-app.get("/applications", async (req, res) => {
+app.get("/api/applications", async (req, res) => {
   try {
-    const { jobId } = req.params;
+    const { jobId } = req.query;
+    if (!jobId) {
+      return res.status(400).json({ error: "Job ID is required" });
+    }
+
     const applications = await Application.findAll({
       where: { job_id: jobId },
       include: [Job] // Optional: include job details
     });
+
     res.json(applications);
   } catch (error) {
-    logger.error(`Error getting applications for job ${req.params.jobId}:`, error);
+    logger.error(`Error getting applications for job ${jobId}:`, error);
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // Authentication Routes
 // Register Route 
